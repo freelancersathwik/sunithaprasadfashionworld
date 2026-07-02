@@ -1,0 +1,7 @@
+# Free ngrok: use ONE tunnel to Vite (5173). API is proxied via /api in vite.config.ts.
+# Run: npm run dev | npm run dev:server | npm run ngrok
+version: "2"
+tunnels:
+  web:
+    addr: 5173
+    proto: http

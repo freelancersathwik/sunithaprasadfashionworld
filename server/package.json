@@ -1,0 +1,26 @@
+{
+  "name": "sunithaprasad-server",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/index.js",
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "@imagekit/nodejs": "^7.9.1",
+    "bcryptjs": "^2.4.3",
+    "cloudinary": "^2.10.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "express-rate-limit": "^8.5.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^8.0.10",
+    "pdfkit": "^0.18.0",
+    "pg": "^8.21.0",
+    "razorpay": "^2.9.6",
+    "resend": "^6.12.4",
+    "uuid": "^10.0.0"
+  }
+}
