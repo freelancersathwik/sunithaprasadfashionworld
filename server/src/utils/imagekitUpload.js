@@ -25,7 +25,10 @@ export const uploadToImageKit = async (fileBuffer, fileName, folder = 'sunithapr
     };
   } catch (error) {
     console.error('ImageKit upload error:', error);
-    throw new Error('Failed to upload image to ImageKit');
+    console.error('Error details:', JSON.stringify(error, null, 2));
+    console.error('Error message:', error.message);
+    console.error('Error code:', error.code);
+    throw new Error(`Failed to upload image to ImageKit: ${error.message || 'Unknown error'}`);
   }
 };
 

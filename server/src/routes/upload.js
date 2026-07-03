@@ -28,9 +28,17 @@ const uploadToCloudinary = (fileBuffer) => {
 // Helper function to upload to ImageKit
 const uploadToImageKitHelper = async (fileBuffer, fileName) => {
   try {
+    console.log('ImageKit configuration check:', {
+      hasImagekit: !!imagekit,
+      urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT ? 'set' : 'not set',
+      publicKey: process.env.IMAGEKIT_PUBLIC_KEY ? 'set' : 'not set',
+      privateKey: process.env.IMAGEKIT_PRIVATE_KEY ? 'set' : 'not set',
+    });
+    
     const result = await uploadToImageKit(fileBuffer, fileName, 'sunithaprasad_sarees');
     return result;
   } catch (error) {
+    console.error('uploadToImageKitHelper error:', error);
     throw error;
   }
 };
