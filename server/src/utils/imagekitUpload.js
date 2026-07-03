@@ -13,7 +13,7 @@ export const uploadToImageKit = async (fileBuffer, fileName, folder = 'sunithapr
   }
   
   try {
-    const result = await imagekit.upload({
+    const result = await imagekit.uploadFile({
       file: fileBuffer,
       fileName: fileName,
       folder: folder,
