@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import multer from 'multer';
 import cloudinary from '../utils/cloudinary.js';
+import imagekit from '../utils/imagekit.js';
 import { uploadToImageKit, deleteFromImageKit } from '../utils/imagekitUpload.js';
 import { authMiddleware, adminMiddleware } from '../middleware/auth.js';
 
