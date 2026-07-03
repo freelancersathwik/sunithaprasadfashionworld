@@ -13,7 +13,11 @@ export const uploadToImageKit = async (fileBuffer, fileName, folder = 'sunithapr
   }
   
   try {
-    const result = await imagekit.uploadFile({
+    console.log('ImageKit available methods:', Object.keys(imagekit).filter(key => typeof imagekit[key] === 'function'));
+    console.log('ImageKit object type:', typeof imagekit);
+    console.log('ImageKit constructor:', imagekit.constructor.name);
+    
+    const result = await imagekit.upload({
       file: fileBuffer,
       fileName: fileName,
       folder: folder,
