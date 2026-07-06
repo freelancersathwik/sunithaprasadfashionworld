@@ -34,17 +34,53 @@ function getBaseFilenameFromImageKitURL(url) {
     const urlObj = new URL(url);
     const pathname = urlObj.pathname;
     const filename = pathname.split('/').pop();
-    // Remove the random suffix (e.g., "filename_abc123.jpg" -> "filename.jpg")
-    const lastUnderscoreIndex = filename.lastIndexOf('_');
+    
+    // Handle complex suffixes by removing everything after the last underscore before extension
+    // But also handle cases where there might be multiple underscores
+    const lastDotIndex = filename.lastIndexOf('.');
+    const extension = filename.substring(lastDotIndex);
+    const nameWithoutExt = filename.substring(0, lastDotIndex);
+    
+    // Try multiple strategies to find the base name
+    // Strategy 1: Remove last underscore segment
+    const lastUnderscoreIndex = nameWithoutExt.lastIndexOf('_');
     if (lastUnderscoreIndex > 0) {
-      const baseName = filename.substring(0, lastUnderscoreIndex);
-      const extension = filename.substring(filename.lastIndexOf('.'));
+      const baseName = nameWithoutExt.substring(0, lastUnderscoreIndex);
       return `${baseName}${extension}`;
     }
-    return filename || null;
+    
+    // Strategy 2: If no underscore, return as-is
+    return filename;
   } catch (error) {
     return null;
   }
+}
+
+// Try to match with different suffix removal strategies
+function getPossibleBaseFilenames(filename) {
+  const results = [];
+  const lastDotIndex = filename.lastIndexOf('.');
+  const extension = filename.substring(lastDotIndex);
+  const nameWithoutExt = filename.substring(0, lastDotIndex);
+  
+  // Original filename
+  results.push(filename);
+  
+  // Remove last underscore segment
+  const lastUnderscoreIndex = nameWithoutExt.lastIndexOf('_');
+  if (lastUnderscoreIndex > 0) {
+    const baseName = nameWithoutExt.substring(0, lastUnderscoreIndex);
+    results.push(`${baseName}${extension}`);
+    
+    // Try removing second-to-last underscore segment as well
+    const secondLastUnderscoreIndex = baseName.lastIndexOf('_');
+    if (secondLastUnderscoreIndex > 0) {
+      const baseName2 = baseName.substring(0, secondLastUnderscoreIndex);
+      results.push(`${baseName2}${extension}`);
+    }
+  }
+  
+  return results;
 }
 
 async function updateFromImageKitAPI() {
@@ -64,19 +100,19 @@ async function updateFromImageKitAPI() {
     console.log('ImageKit files:');
     for (const file of imageKitFiles) {
       const filename = file.name;
-      const baseFilename = getBaseFilenameFromImageKitURL(file.url);
-      // Store both the full filename and base filename for matching
-      filenameToImageKit[filename] = {
-        url: file.url,
-        fileId: file.fileId,
-      };
-      if (baseFilename && baseFilename !== filename) {
-        filenameToImageKit[baseFilename] = {
-          url: file.url,
-          fileId: file.fileId,
-        };
+      const possibleNames = getPossibleBaseFilenames(filename);
+      
+      // Store all possible base names for matching
+      for (const name of possibleNames) {
+        if (!filenameToImageKit[name]) {
+          filenameToImageKit[name] = {
+            url: file.url,
+            fileId: file.fileId,
+          };
+        }
       }
-      console.log(`  ${filename} -> ${baseFilename}`);
+      
+      console.log(`  ${filename} -> ${possibleNames.join(', ')}`);
     }
     console.log();
 
