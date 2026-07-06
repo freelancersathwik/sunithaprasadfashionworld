@@ -200,6 +200,7 @@ export default function App() {
   const [showProductModal, setShowProductModal] = useState(false);
   const [imageUploading, setImageUploading] = useState(false);
   const [categoryImageUploading, setCategoryImageUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const [productForm, setProductForm] = useState({
     id: "",
     name: "",
@@ -815,15 +816,15 @@ export default function App() {
     }
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) return;
+  const handleImageUpload = async (files: FileList | File[]) => {
+    if (!files || files.length === 0) return;
     
     setImageUploading(true);
     triggerNotification("Uploading image(s)...");
     
     try {
       const formData = new FormData();
-      Array.from(e.target.files).forEach(file => {
+      Array.from(files).forEach(file => {
         formData.append("images", file);
       });
       
@@ -845,6 +846,34 @@ export default function App() {
       triggerNotification("Failed to upload image(s).", "error");
     } finally {
       setImageUploading(false);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    handleImageUpload(e.target.files);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      handleImageUpload(files);
     }
   };
 
@@ -3339,21 +3368,24 @@ export default function App() {
                     accept="image/*"
                     multiple
                     disabled={imageUploading}
-                    onChange={handleImageUpload}
+                    onChange={handleInputChange}
                     className="hidden"
                     id="cloudinary-image-picker"
                   />
                   <label
                     htmlFor="cloudinary-image-picker"
-                    className={`w-full flex flex-col items-center justify-center gap-2 border-2 border-dashed border-[#E9DCC9] rounded-xl py-6 px-4 bg-[#FDF8F2] hover:bg-[#FDF8F2]/60 hover:border-[#7D1C1C] cursor-pointer transition-all ${
-                      imageUploading ? "opacity-50 cursor-not-allowed" : ""
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    className={`w-full flex flex-col items-center justify-center gap-2 border-2 border-dashed rounded-xl py-6 px-4 bg-[#FDF8F2] hover:bg-[#FDF8F2]/60 cursor-pointer transition-all ${
+                      imageUploading ? "opacity-50 cursor-not-allowed border-[#E9DCC9]" : isDragging ? "border-[#7D1C1C] bg-[#FDF8F2]" : "border-[#E9DCC9] hover:border-[#7D1C1C]"
                     }`}
                   >
                     <ImageIcon className="text-[#C4913A] w-6 h-6 animate-pulse" />
                     <span className="font-bold text-xs text-[#7D1C1C]">
-                      {imageUploading ? "Uploading to Cloudinary..." : "Choose Files / Upload Saree Photos"}
+                      {imageUploading ? "Uploading..." : isDragging ? "Drop images here" : "Drag & Drop or Click to Upload"}
                     </span>
-                    <span className="text-[10px] text-[#7A5F50]">Supports JPG, PNG, WEBP (multiple selection allowed)</span>
+                    <span className="text-[10px] text-[#7A5F50]">Supports JPG, PNG, WEBP (multiple files allowed)</span>
                   </label>
                 </div>
 
