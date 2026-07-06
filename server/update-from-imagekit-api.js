@@ -28,19 +28,18 @@ function getFileNameFromCloudinaryURL(url) {
   }
 }
 
-// Extract filename from ImageKit URL
-function getFileNameFromImageKitURL(url) {
+// Extract base filename from ImageKit URL (remove random suffix)
+function getBaseFilenameFromImageKitURL(url) {
   try {
     const urlObj = new URL(url);
     const pathname = urlObj.pathname;
     const filename = pathname.split('/').pop();
     // Remove the random suffix (e.g., "filename_abc123.jpg" -> "filename.jpg")
-    const parts = filename.split('_');
-    if (parts.length > 1) {
-      // Keep the base name and extension
-      const baseName = parts.slice(0, -1).join('_');
-      const extension = parts[parts.length - 1].split('.').pop();
-      return `${baseName}.${extension}`;
+    const lastUnderscoreIndex = filename.lastIndexOf('_');
+    if (lastUnderscoreIndex > 0) {
+      const baseName = filename.substring(0, lastUnderscoreIndex);
+      const extension = filename.substring(filename.lastIndexOf('.'));
+      return `${baseName}${extension}`;
     }
     return filename || null;
   } catch (error) {
@@ -60,15 +59,26 @@ async function updateFromImageKitAPI() {
 
     console.log(`Found ${imageKitFiles.length} files in ImageKit\n`);
 
-    // Create a mapping from filename to ImageKit URL and fileId
+    // Create a mapping from base filename (without random suffix) to ImageKit URL and fileId
     const filenameToImageKit = {};
+    console.log('ImageKit files:');
     for (const file of imageKitFiles) {
       const filename = file.name;
+      const baseFilename = getBaseFilenameFromImageKitURL(file.url);
+      // Store both the full filename and base filename for matching
       filenameToImageKit[filename] = {
         url: file.url,
         fileId: file.fileId,
       };
+      if (baseFilename && baseFilename !== filename) {
+        filenameToImageKit[baseFilename] = {
+          url: file.url,
+          fileId: file.fileId,
+        };
+      }
+      console.log(`  ${filename} -> ${baseFilename}`);
     }
+    console.log();
 
     // Get all products with Cloudinary URLs
     const result = await pool.query(
@@ -103,6 +113,11 @@ async function updateFromImageKitAPI() {
 
         // Extract filename from Cloudinary URL
         const cloudinaryFilename = getFileNameFromCloudinaryURL(url);
+        
+        if (cloudinaryFilename) {
+          console.log(`  Cloudinary filename: ${cloudinaryFilename}`);
+          console.log(`  Match found: ${filenameToImageKit[cloudinaryFilename] ? 'Yes' : 'No'}`);
+        }
         
         if (cloudinaryFilename && filenameToImageKit[cloudinaryFilename]) {
           console.log(`Updating URL for product "${product.name}": ${cloudinaryFilename}`);
