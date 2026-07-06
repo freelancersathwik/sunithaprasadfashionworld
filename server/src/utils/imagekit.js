@@ -3,6 +3,9 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+console.log('ImageKit import:', ImageKit);
+console.log('ImageKit constructor:', ImageKit?.name);
+
 const urlEndpoint = process.env.IMAGEKIT_URL_ENDPOINT;
 const publicKey = process.env.IMAGEKIT_PUBLIC_KEY;
 const privateKey = process.env.IMAGEKIT_PRIVATE_KEY;
@@ -26,5 +29,9 @@ const imagekit = new ImageKit({
   publicKey,
   privateKey,
 });
+
+console.log("ImageKit instance:", imagekit);
+console.log("upload:", typeof imagekit.upload);
+console.log("constructor:", imagekit.constructor?.name);
 
 export default imagekit;

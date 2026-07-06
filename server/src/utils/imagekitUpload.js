@@ -15,6 +15,7 @@ export const uploadToImageKit = async (fileBuffer, fileName, folder = 'sunithapr
   try {
     // Debug logging
     console.log('ImageKit instance:', imagekit);
+    console.log('ImageKit constructor:', imagekit.constructor?.name);
     console.log('Type of imagekit.upload:', typeof imagekit.upload);
     console.log('ImageKit available methods:', Object.keys(imagekit));
     
