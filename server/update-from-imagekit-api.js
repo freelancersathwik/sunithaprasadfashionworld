@@ -77,6 +77,21 @@ function getPossibleBaseFilenames(filename) {
     if (secondLastUnderscoreIndex > 0) {
       const baseName2 = baseName.substring(0, secondLastUnderscoreIndex);
       results.push(`${baseName2}${extension}`);
+      
+      // Try removing third-to-last underscore segment as well
+      const thirdLastUnderscoreIndex = baseName2.lastIndexOf('_');
+      if (thirdLastUnderscoreIndex > 0) {
+        const baseName3 = baseName2.substring(0, thirdLastUnderscoreIndex);
+        results.push(`${baseName3}${extension}`);
+      }
+    }
+    
+    // Try removing all underscore segments after the first part
+    // For files like mvasou55yuwjtrnd45dg_Z7T9h_I_t.jpg -> mvasou55yuwjtrnd45dg.jpg
+    const firstUnderscoreIndex = nameWithoutExt.indexOf('_');
+    if (firstUnderscoreIndex > 0) {
+      const firstPart = nameWithoutExt.substring(0, firstUnderscoreIndex);
+      results.push(`${firstPart}${extension}`);
     }
   }
   
@@ -153,6 +168,12 @@ async function updateFromImageKitAPI() {
         if (cloudinaryFilename) {
           console.log(`  Cloudinary filename: ${cloudinaryFilename}`);
           console.log(`  Match found: ${filenameToImageKit[cloudinaryFilename] ? 'Yes' : 'No'}`);
+          if (!filenameToImageKit[cloudinaryFilename]) {
+            console.log(`  Available keys starting with '${cloudinaryFilename.substring(0, 10)}':`);
+            Object.keys(filenameToImageKit).filter(k => k.startsWith(cloudinaryFilename.substring(0, 10))).forEach(k => {
+              console.log(`    - ${k}`);
+            });
+          }
         }
         
         if (cloudinaryFilename && filenameToImageKit[cloudinaryFilename]) {
