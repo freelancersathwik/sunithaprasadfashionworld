@@ -141,7 +141,7 @@ async function migrateProduct(product, index, total) {
   try {
     await pool.query(
       `UPDATE products SET image_urls = $1, image_public_ids = $2 WHERE id = $3`,
-      [JSON.stringify(newImageUrls), JSON.stringify(newImagePublicIds), product.id]
+      [newImageUrls, newImagePublicIds, product.id]
     );
     console.log('  Product updated in database');
   } catch (error) {
