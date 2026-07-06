@@ -877,6 +877,29 @@ export default function App() {
     }
   };
 
+  const handlePaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    
+    const files: File[] = [];
+    
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.type.indexOf('image') !== -1) {
+        const file = item.getAsFile();
+        if (file) {
+          files.push(file);
+        }
+      }
+    }
+    
+    if (files.length > 0) {
+      handleImageUpload(files);
+    }
+  };
+
   const handleEditProductClick = (prod: any) => {
     setProductForm({
       id: prod.id,
@@ -3377,15 +3400,16 @@ export default function App() {
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
+                    onPaste={handlePaste}
                     className={`w-full flex flex-col items-center justify-center gap-2 border-2 border-dashed rounded-xl py-6 px-4 bg-[#FDF8F2] hover:bg-[#FDF8F2]/60 cursor-pointer transition-all ${
                       imageUploading ? "opacity-50 cursor-not-allowed border-[#E9DCC9]" : isDragging ? "border-[#7D1C1C] bg-[#FDF8F2]" : "border-[#E9DCC9] hover:border-[#7D1C1C]"
                     }`}
                   >
                     <ImageIcon className="text-[#C4913A] w-6 h-6 animate-pulse" />
                     <span className="font-bold text-xs text-[#7D1C1C]">
-                      {imageUploading ? "Uploading..." : isDragging ? "Drop images here" : "Drag & Drop or Click to Upload"}
+                      {imageUploading ? "Uploading..." : isDragging ? "Drop images here" : "Drag & Drop, Paste, or Click to Upload"}
                     </span>
-                    <span className="text-[10px] text-[#7A5F50]">Supports JPG, PNG, WEBP (multiple files allowed)</span>
+                    <span className="text-[10px] text-[#7A5F50]">Supports JPG, PNG, WEBP (Ctrl+V to paste)</span>
                   </label>
                 </div>
 
