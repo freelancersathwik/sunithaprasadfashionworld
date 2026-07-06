@@ -6,7 +6,8 @@
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
     "migrate-images": "node migrate-cloudinary-to-imagekit.js",
-    "migrate-missing": "node migrate-missing-images.js"
+    "migrate-missing": "node migrate-missing-images.js",
+    "remove-broken-urls": "node remove-broken-urls.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
