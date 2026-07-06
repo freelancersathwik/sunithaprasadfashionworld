@@ -81,7 +81,7 @@ function getFileNameFromURL(url) {
 }
 
 // Migrate a single product
-async function migrateProduct(product, index, total) {
+async function migrateProduct(product, index, total, skipUploads) {
   console.log(`\nProduct ${index + 1}/${total}: ${product.name}`);
   
   const imageUrls = product.image_urls || [];
@@ -107,6 +107,15 @@ async function migrateProduct(product, index, total) {
     // Skip if already ImageKit
     if (isImageKitURL(oldUrl)) {
       console.log('    Skipping (already ImageKit)');
+      newImageUrls.push(oldUrl);
+      newImagePublicIds.push(oldPublicId);
+      skippedImages++;
+      continue;
+    }
+    
+    // Skip uploads if flag is set
+    if (skipUploads) {
+      console.log('    Skipping upload (skipUploads mode)');
       newImageUrls.push(oldUrl);
       newImagePublicIds.push(oldPublicId);
       skippedImages++;
@@ -150,8 +159,12 @@ async function migrateProduct(product, index, total) {
 }
 
 // Main migration function
-async function migrate() {
-  console.log('Starting Cloudinary to ImageKit migration...\n');
+async function migrate(skipUploads = false) {
+  console.log('Starting Cloudinary to ImageKit migration...');
+  if (skipUploads) {
+    console.log('MODE: Skip uploads, only update database with existing ImageKit URLs');
+  }
+  console.log();
   console.log('Configuration:');
   console.log('  Database:', process.env.DATABASE_URL ? 'Connected' : 'Not configured');
   console.log('  ImageKit URL Endpoint:', process.env.IMAGEKIT_URL_ENDPOINT || 'Not configured');
@@ -183,7 +196,7 @@ async function migrate() {
     
     // Migrate each product
     for (let i = 0; i < products.length; i++) {
-      await migrateProduct(products[i], i, totalProducts);
+      await migrateProduct(products[i], i, totalProducts, skipUploads);
     }
     
     // Print summary
@@ -206,7 +219,8 @@ async function migrate() {
 }
 
 // Run migration
-migrate().then(() => {
+const skipUploads = process.argv.includes('--skip-uploads');
+migrate(skipUploads).then(() => {
   console.log('\nMigration completed successfully!');
   process.exit(0);
 }).catch((error) => {
