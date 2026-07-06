@@ -44,7 +44,7 @@ const uploadToImageKitHelper = async (fileBuffer, fileName) => {
   }
 };
 
-// POST /api/upload - Admin upload endpoint (using ImageKit with Cloudinary fallback)
+// POST /api/upload - Admin upload endpoint (using ImageKit only)
 router.post('/', authMiddleware, adminMiddleware, upload.array('images', 8), async (req, res) => {
   try {
     console.log('Upload request received');
@@ -58,45 +58,26 @@ router.post('/', authMiddleware, adminMiddleware, upload.array('images', 8), asy
     console.log('Upload configuration check:', {
       hasImagekit: !!imagekit,
       urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT,
-      cloudinaryConfigured: !!cloudinary,
     });
 
-    let uploadedImages;
-    
-    // Try ImageKit first, fall back to Cloudinary if it fails
-    try {
-      console.log('Attempting ImageKit upload...');
-      const uploadPromises = req.files.map(file => 
-        uploadToImageKitHelper(file.buffer, file.originalname)
-      );
-      const results = await Promise.all(uploadPromises);
+    console.log('Attempting ImageKit upload...');
+    const uploadPromises = req.files.map(file => 
+      uploadToImageKitHelper(file.buffer, file.originalname)
+    );
+    const results = await Promise.all(uploadPromises);
 
-      uploadedImages = results.map(result => ({
-        url: result.url,
-        public_id: result.fileId  // Return as public_id for frontend compatibility
-      }));
-      console.log('ImageKit upload successful:', uploadedImages);
-    } catch (imagekitError) {
-      console.error('ImageKit upload failed, falling back to Cloudinary:', imagekitError.message);
-      
-      // Fallback to Cloudinary
-      console.log('Attempting Cloudinary upload...');
-      const uploadPromises = req.files.map(file => uploadToCloudinary(file.buffer));
-      const results = await Promise.all(uploadPromises);
-
-      uploadedImages = results.map(result => ({
-        url: result.secure_url,
-        public_id: result.public_id
-      }));
-      console.log('Cloudinary upload successful (fallback):', uploadedImages);
-    }
+    const uploadedImages = results.map(result => ({
+      url: result.url,
+      public_id: result.fileId  // Return as public_id for frontend compatibility
+    }));
+    console.log('ImageKit upload successful:', uploadedImages);
 
     console.log('Returning uploaded images:', uploadedImages);
     res.json({ images: uploadedImages });
   } catch (err) {
     console.error('Upload error:', err);
     console.error('Upload error details:', JSON.stringify(err, null, 2));
-    res.status(500).json({ error: 'Failed to upload images.' });
+    res.status(500).json({ error: 'Failed to upload images to ImageKit.' });
   }
 });
 
