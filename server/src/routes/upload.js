@@ -3,6 +3,7 @@ import multer from 'multer';
 import cloudinary from '../utils/cloudinary.js';
 import imagekit from '../utils/imagekit.js';
 import { uploadToImageKit, deleteFromImageKit } from '../utils/imagekitUpload.js';
+import { compressImage } from '../utils/imageCompression.js';
 import { authMiddleware, adminMiddleware } from '../middleware/auth.js';
 
 const router = Router();
@@ -36,7 +37,12 @@ const uploadToImageKitHelper = async (fileBuffer, fileName) => {
       privateKey: process.env.IMAGEKIT_PRIVATE_KEY ? 'set' : 'not set',
     });
     
-    const result = await uploadToImageKit(fileBuffer, fileName, 'sunithaprasad_sarees');
+    // Compress image to 120KB before upload
+    console.log('Compressing image...');
+    const compressedBuffer = await compressImage(fileBuffer, 120);
+    console.log('Compression complete');
+    
+    const result = await uploadToImageKit(compressedBuffer, fileName, 'sunithaprasad_sarees');
     return result;
   } catch (error) {
     console.error('uploadToImageKitHelper error:', error);
