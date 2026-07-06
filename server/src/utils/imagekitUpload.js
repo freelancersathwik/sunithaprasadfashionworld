@@ -13,6 +13,11 @@ export const uploadToImageKit = async (fileBuffer, fileName, folder = 'sunithapr
   }
   
   try {
+    // Debug logging
+    console.log('ImageKit instance:', imagekit);
+    console.log('Type of imagekit.upload:', typeof imagekit.upload);
+    console.log('ImageKit available methods:', Object.keys(imagekit));
+    
     // Convert buffer to base64 for ImageKit upload
     const base64File = fileBuffer.toString('base64');
     
