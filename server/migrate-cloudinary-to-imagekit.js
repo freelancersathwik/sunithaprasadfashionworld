@@ -168,7 +168,7 @@ async function migrate() {
     // Get all products with images
     console.log('\nFetching products from database...');
     const result = await pool.query(
-      `SELECT id, name, image_urls, image_public_ids FROM products WHERE image_urls IS NOT NULL AND jsonb_array_length(image_urls) > 0`
+      `SELECT id, name, image_urls, image_public_ids FROM products WHERE image_urls IS NOT NULL AND array_length(image_urls, 1) > 0`
     );
     
     const products = result.rows;
